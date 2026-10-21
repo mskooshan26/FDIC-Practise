@@ -1,0 +1,321 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Is My Money Safe?</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,800&family=Atkinson+Hyperlegible:wght@400;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+/* Layout: a single teller-window column — rules up top, then three hands-on stations stacked like bank counters */
+:root{
+  --bg:#eef2f4; --surface:#ffffff; --ink:#132433; --muted:#566676; --line:#d3dbe2;
+  --vault:#1d4e6b; --brass:#c08a1e; --safe:#1f8a5b; --safe-soft:#dcf1e6; --risk:#c4462f; --risk-soft:#f8e1dc;
+  --display:"Bricolage Grotesque", "Trebuchet MS", sans-serif;
+  --body:"Atkinson Hyperlegible", Verdana, sans-serif;
+  --mono:"IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0f1820; --surface:#16232e; --ink:#e6edf2; --muted:#9aaab8; --line:#2a3a48;
+  --vault:#7cb8dc; --brass:#e0ac46; --safe:#4cc68c; --safe-soft:#173a2b; --risk:#f07a63; --risk-soft:#43231d; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f1820; --surface:#16232e; --ink:#e6edf2; --muted:#9aaab8; --line:#2a3a48;
+  --vault:#7cb8dc; --brass:#e0ac46; --safe:#4cc68c; --safe-soft:#173a2b; --risk:#f07a63; --risk-soft:#43231d; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.55;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:28px 64px}
+.wrap{max-width:900px;margin:0 auto;display:flex;flex-direction:column;gap:44px}
+h1,h2,h3{font-family:var(--display);text-wrap:balance;margin:0;line-height:1.1}
+h1{font-size:clamp(2.1rem,6vw,3.4rem);font-weight:800;letter-spacing:-.02em}
+h2{font-size:1.75rem;font-weight:800}
+h3{font-size:1.15rem;font-weight:500}
+p{margin:0}
+.eyebrow{font-family:var(--mono);font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;color:var(--brass);font-weight:600}
+.muted{color:var(--muted)}
+a{color:var(--vault)}
+.money{font-family:var(--mono);font-variant-numeric:tabular-nums;font-weight:600}
+button,select,input{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--brass);outline-offset:2px}
+
+/* hero */
+.hero{display:grid;grid-template-columns:1fr auto;gap:24px;align-items:center}
+.hero-text{display:flex;flex-direction:column;gap:14px;min-width:0}
+.seal{width:150px;height:150px;border-radius:50%;border:4px double var(--brass);display:grid;place-items:center;text-align:center;
+  font-family:var(--mono);color:var(--brass);padding:14px;transform:rotate(-8deg)}
+.seal b{display:block;font-family:var(--display);font-size:1.7rem;color:var(--ink)}
+.seal span{font-size:.68rem;letter-spacing:.1em;text-transform:uppercase}
+@media (max-width:560px){.hero{grid-template-columns:1fr}.seal{width:120px;height:120px}.seal b{font-size:1.35rem}}
+
+section{display:flex;flex-direction:column;gap:18px}
+.station-head{display:flex;flex-direction:column;gap:6px}
+
+/* rules */
+.rules{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+@media (max-width:700px){.rules{grid-template-columns:1fr}}
+.rule{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:18px;display:flex;flex-direction:column;gap:8px}
+.rule .money{font-size:1.5rem;color:var(--vault)}
+.lists{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media (max-width:620px){.lists{grid-template-columns:1fr}}
+.list{border-radius:10px;padding:16px 18px}
+.list.yes{background:var(--safe-soft)} .list.no{background:var(--risk-soft)}
+.list h3{margin-bottom:6px}
+.list.yes h3{color:var(--safe)} .list.no h3{color:var(--risk)}
+.list ul{margin:0;padding-left:20px}
+.cats{background:var(--surface);border:1px solid var(--line);border-radius:10px;overflow-x:auto}
+.cats table{width:100%;border-collapse:collapse;min-width:480px}
+.cats th,.cats td{text-align:left;padding:10px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+.cats tr:last-child td{border-bottom:0}
+.cats th{font-family:var(--mono);font-size:.75rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+
+/* station panel */
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:20px;display:flex;flex-direction:column;gap:16px}
+.scorebar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.pill{font-family:var(--mono);font-size:.85rem;padding:4px 10px;border-radius:999px;background:var(--bg);border:1px solid var(--line)}
+.btn{border:2px solid var(--vault);background:transparent;color:var(--vault);border-radius:8px;padding:8px 14px;font-weight:700}
+.btn.solid{background:var(--vault);color:var(--surface)}
+.btn:hover{filter:brightness(1.1)}
+
+/* sort game */
+.sort-card{border:2px dashed var(--line);border-radius:12px;padding:22px;text-align:center;display:flex;flex-direction:column;gap:14px;align-items:center}
+.sort-item{font-family:var(--display);font-size:1.6rem;font-weight:800}
+.sort-btns{display:flex;gap:12px;flex-wrap:wrap;justify-content:center}
+.sort-btns button{min-width:150px;padding:12px 16px;border-radius:10px;font-weight:700;border:2px solid}
+.b-yes{border-color:var(--safe)!important;color:var(--safe);background:var(--safe-soft)}
+.b-no{border-color:var(--risk)!important;color:var(--risk);background:var(--risk-soft)}
+.feedback{min-height:3em;max-width:60ch}
+.feedback.good b{color:var(--safe)} .feedback.bad b{color:var(--risk)}
+.bins{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.bin{border-radius:10px;padding:12px;min-height:70px}
+.bin.yes{background:var(--safe-soft)} .bin.no{background:var(--risk-soft)}
+.bin h4{margin:0 0 6px;font-family:var(--mono);font-size:.75rem;letter-spacing:.08em;text-transform:uppercase}
+.bin.yes h4{color:var(--safe)} .bin.no h4{color:var(--risk)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font-size:.85rem;background:var(--surface);border-radius:999px;padding:2px 10px;border:1px solid var(--line)}
+
+/* calculator */
+.form{display:grid;grid-template-columns:repeat(4,1fr) auto;gap:10px;align-items:end}
+@media (max-width:760px){.form{grid-template-columns:1fr 1fr}}
+.form label{display:flex;flex-direction:column;gap:4px;font-size:.85rem;color:var(--muted);min-width:0}
+.form select,.form input{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:9px 10px;width:100%;color:var(--ink)}
+.acct-list{display:flex;flex-direction:column;gap:8px}
+.acct{display:grid;grid-template-columns:auto 1fr auto auto;gap:12px;align-items:center;padding:10px 12px;border:1px solid var(--line);border-radius:8px}
+.acct .tag{font-family:var(--mono);font-size:.75rem;padding:2px 8px;border-radius:6px;background:var(--bg)}
+.acct .x{border:0;background:transparent;color:var(--muted);font-size:1.2rem;padding:0 6px}
+.groups{display:flex;flex-direction:column;gap:12px}
+.group{display:flex;flex-direction:column;gap:6px}
+.group-top{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;font-size:.95rem}
+.bar{height:18px;border-radius:5px;background:var(--bg);display:flex;overflow:hidden;border:1px solid var(--line)}
+.bar i{display:block;height:100%}
+.bar .ins{background:var(--safe)} .bar .unins{background:var(--risk)}
+.totals{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+@media (max-width:560px){.totals{grid-template-columns:1fr}}
+.total{border-radius:10px;padding:14px;background:var(--bg)}
+.total .money{font-size:1.4rem;display:block}
+.total.s .money{color:var(--safe)} .total.r .money{color:var(--risk)}
+.total small{color:var(--muted)}
+.sample-note{font-size:.85rem;color:var(--muted)}
+
+/* scenarios */
+.scen{display:flex;flex-direction:column;gap:12px}
+.scen-q{font-size:1.15rem;max-width:62ch}
+.answer-row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.answer-row .dollar{position:relative}
+.answer-row input{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:9px 10px 9px 24px;width:190px;font-family:var(--mono);color:var(--ink)}
+.answer-row .dollar::before{content:"$";position:absolute;left:10px;top:50%;transform:translateY(-50%);font-family:var(--mono);color:var(--muted)}
+.dots{display:flex;gap:6px}
+.dots span{width:12px;height:12px;border-radius:50%;background:var(--line)}
+.dots span.on{background:var(--vault)} .dots span.ok{background:var(--safe)} .dots span.miss{background:var(--risk)}
+footer{font-size:.85rem;color:var(--muted);border-top:1px solid var(--line);padding-top:16px}
+@media (prefers-reduced-motion:no-preference){.sort-card.pop{animation:pop .25s ease}@keyframes pop{from{transform:scale(.97)}to{transform:none}}}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+<header class="hero">
+  <div class="hero-text">
+    <div class="eyebrow">Financial Literacy · Banking</div>
+    <h1>Is my money safe if my bank fails?</h1>
+    <p class="muted" style="max-width:58ch">FDIC insurance protects the money you deposit in a bank. Learn the rules, sort what's covered, then test them on real-looking scenarios.</p>
+    <p><a href="https://www.youtube.com/watch?v=hx4zId5Zrko" target="_blank" rel="noopener">Watch: What is FDIC Insurance and What Does it Cover? (Live Oak Bank, about 2.5 min)</a></p>
+  </div>
+  <div class="seal" aria-hidden="true"><div><span>Insured up to</span><b>$250,000</b><span>per depositor</span></div></div>
+</header>
+
+<section id="rules">
+  <div class="station-head">
+    <div class="eyebrow">The three rules</div>
+    <h2>$250,000, counted three ways</h2>
+  </div>
+  <div class="rules">
+    <div class="rule"><span class="money">$250K</span><h3>Per depositor</h3><p class="muted">Each person is covered up to $250,000.</p></div>
+    <div class="rule"><span class="money">× each bank</span><h3>Per insured bank</h3><p class="muted">Money at a different FDIC bank gets its own separate $250,000.</p></div>
+    <div class="rule"><span class="money">× each category</span><h3>Per ownership category</h3><p class="muted">At the same bank, single, joint, retirement, trust and business accounts are each counted separately.</p></div>
+  </div>
+  <div class="lists">
+    <div class="list yes"><h3>Covered (deposits)</h3><ul><li>Checking accounts</li><li>Savings accounts</li><li>Money Market Deposit Accounts (MMDAs)</li><li>Certificates of Deposit (CDs)</li><li>Cashier's checks and money orders from the bank</li></ul></div>
+    <div class="list no"><h3>Not covered (investments)</h3><ul><li>Stocks and bonds</li><li>Mutual funds and ETFs</li><li>Annuities and life insurance</li><li>U.S. Treasury securities (backed by the government, not FDIC)</li><li>Cryptocurrency</li></ul></div>
+  </div>
+  <div class="cats">
+    <table>
+      <thead><tr><th>Ownership category</th><th>Who owns it</th><th>Coverage</th></tr></thead>
+      <tbody>
+        <tr><td><b>Single</b></td><td>One person</td><td><span class="money">$250,000</span></td></tr>
+        <tr><td><b>Joint</b></td><td>Two or more people</td><td><span class="money">$250,000</span> per co-owner (2 owners = <span class="money">$500,000</span>)</td></tr>
+        <tr><td><b>Retirement</b></td><td>IRAs</td><td><span class="money">$250,000</span></td></tr>
+        <tr><td><b>Trust</b></td><td>Revocable or irrevocable trusts</td><td>Grows with the number of beneficiaries</td></tr>
+        <tr><td><b>Business</b></td><td>Corporations, LLCs, partnerships</td><td><span class="money">$250,000</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section id="sort">
+  <div class="station-head">
+    <div class="eyebrow">Station 1</div>
+    <h2>Covered or not covered?</h2>
+    <p class="muted">Your bank just failed. Is this item protected by FDIC insurance?</p>
+  </div>
+  <div class="panel">
+    <div class="scorebar"><span class="pill" id="sortCount">Card 1 of 14</span><span class="pill" id="sortScore">Score 0</span></div>
+    <div class="sort-card" id="sortCard">
+      <div class="sort-item" id="sortItem">Checking account</div>
+      <div class="sort-btns">
+        <button class="b-yes" id="btnYes" type="button">Covered</button>
+        <button class="b-no" id="btnNo" type="button">Not covered</button>
+      </div>
+      <p class="feedback" id="sortFb" aria-live="polite"></p>
+      <button class="btn solid" id="btnNext" type="button" hidden>Next card</button>
+    </div>
+    <div class="bins">
+      <div class="bin yes"><h4>Covered</h4><div class="chips" id="binYes"></div></div>
+      <div class="bin no"><h4>Not covered</h4><div class="chips" id="binNo"></div></div>
+    </div>
+  </div>
+</section>
+
+<section id="scenarios">
+  <div class="station-head">
+    <div class="eyebrow">Station 2</div>
+    <h2>Scenario challenge</h2>
+    <p class="muted">Read each case and type the dollar amount.</p>
+  </div>
+  <div class="panel scen">
+    <div class="scorebar"><div class="dots" id="dots"></div><span class="pill" id="scScore">0 correct</span></div>
+    <p class="scen-q" id="scQ"></p>
+    <form class="answer-row" id="scForm">
+      <span class="dollar"><input id="scIn" type="number" min="0" step="1" inputmode="numeric" aria-label="Your answer in dollars"></span>
+      <button class="btn solid" type="submit">Check</button>
+      <button class="btn" type="button" id="scNext" hidden>Next case</button>
+    </form>
+    <p class="feedback" id="scFb" aria-live="polite"></p>
+  </div>
+</section>
+
+<footer>Based on the Live Oak Bank video "What is FDIC Insurance and What Does it Cover?" Simplified for class. Check fdic.gov for full rules.</footer>
+</div>
+
+<script>
+const fmt = n => "$" + Math.round(n).toLocaleString("en-US");
+
+/* ---------- Station 1: sort ---------- */
+const ITEMS = [
+  ["Checking account", true, "Checking is a deposit account, so it's covered up to $250,000."],
+  ["Bitcoin", false, "Crypto is not a bank deposit. FDIC does not cover digital assets."],
+  ["Certificate of Deposit (CD)", true, "A CD is a deposit, even though your money is locked in for a while."],
+  ["Shares of Apple stock", false, "Stocks are investments. They can lose value and FDIC doesn't protect them."],
+  ["Savings account", true, "Savings accounts are standard deposits, so they're covered."],
+  ["Mutual fund bought at your bank", false, "Buying it at an FDIC bank doesn't matter. A mutual fund is still an investment."],
+  ["Cashier's check", true, "Official checks issued by the bank are covered."],
+  ["U.S. Treasury bond", false, "Treasuries are backed by the U.S. government directly, not by FDIC."],
+  ["Money Market Deposit Account", true, "An MMDA is a deposit account. Careful: a money market mutual fund is different and is not covered."],
+  ["ETF (exchange-traded fund)", false, "ETFs are investments, so FDIC doesn't cover them."],
+  ["Money order from the bank", true, "Money orders issued by the bank are covered like cashier's checks."],
+  ["Life insurance policy", false, "Insurance products are not deposits."],
+  ["Corporate bond", false, "Bonds are investments, not deposits."],
+  ["Annuity", false, "Annuities are insurance/investment products. Not covered."]
+];
+let order = [...ITEMS].sort(() => Math.random() - .5), si = 0, sScore = 0, answered = false;
+const $ = id => document.getElementById(id);
+function showSort(){
+  if (si >= order.length){
+    $("sortItem").textContent = `Done: ${sScore} / ${order.length}`;
+    $("sortFb").innerHTML = sScore >= 12 ? "<b>Great sorting.</b> You know deposits from investments." : "<b>Good effort.</b> Remember: deposits are covered, investments are not.";
+    $("btnYes").hidden = $("btnNo").hidden = true;
+    $("btnNext").hidden = false; $("btnNext").textContent = "Play again";
+    $("sortCount").textContent = "Finished"; return;
+  }
+  answered = false;
+  $("sortItem").textContent = order[si][0];
+  $("sortFb").textContent = ""; $("sortFb").className = "feedback";
+  $("btnYes").hidden = $("btnNo").hidden = false; $("btnNext").hidden = true;
+  $("sortCount").textContent = `Card ${si+1} of ${order.length}`;
+  $("sortCard").classList.remove("pop"); void $("sortCard").offsetWidth; $("sortCard").classList.add("pop");
+}
+function guess(g){
+  if (answered) return; answered = true;
+  const [name, cov, why] = order[si], ok = g === cov;
+  if (ok) sScore++;
+  $("sortScore").textContent = "Score " + sScore;
+  $("sortFb").className = "feedback " + (ok ? "good" : "bad");
+  $("sortFb").innerHTML = `<b>${ok ? "Correct." : "Not quite."}</b> ${why}`;
+  const chip = document.createElement("span"); chip.className = "chip"; chip.textContent = name;
+  $(cov ? "binYes" : "binNo").appendChild(chip);
+  $("btnYes").hidden = $("btnNo").hidden = true;
+  $("btnNext").hidden = false; $("btnNext").textContent = "Next card"; $("btnNext").focus();
+}
+$("btnYes").onclick = () => guess(true);
+$("btnNo").onclick = () => guess(false);
+$("btnNext").onclick = () => {
+  if (si >= order.length){ order.sort(() => Math.random() - .5); si = 0; sScore = 0; $("binYes").innerHTML = $("binNo").innerHTML = ""; $("sortScore").textContent = "Score 0"; }
+  else si++;
+  showSort();
+};
+showSort();
+
+/* ---------- Station 2: scenarios ---------- */
+const SC = [
+  {q:"Jordan has $180,000 in a savings account at one bank. The bank fails. How much money is NOT insured?", a:0, why:"$180,000 is under the $250,000 limit, so all of it is covered."},
+  {q:"Maria has $310,000 in a single savings account at Bank A. How much money is NOT insured?", a:60000, why:"$310,000 − $250,000 = $60,000 is over the limit and at risk."},
+  {q:"Maria moves $150,000 to Bank B. Now she has $160,000 at Bank A and $150,000 at Bank B. How much is NOT insured now?", a:0, why:"Each bank gives her its own $250,000. Both amounts are under the limit."},
+  {q:"Sam and Alex share a joint checking account with $420,000. How much is NOT insured?", a:0, why:"A joint account with 2 owners is covered up to $500,000 ($250,000 each)."},
+  {q:"Dev has $200,000 in a single savings account and $200,000 in an IRA CD at the same bank. How much is NOT insured?", a:0, why:"Single and retirement are different ownership categories, so each gets $250,000."},
+  {q:"Priya has $50,000 in checking and $100,000 in stocks she bought through her bank. How much does FDIC insurance cover?", a:50000, why:"Only the checking deposit is covered. Stocks are investments, even when bought at a bank."},
+  {q:"Luis has a $260,000 CD and $40,000 in checking, both in his name at one bank. How much is NOT insured?", a:50000, why:"Both are single accounts at the same bank, so they share one limit: $300,000 − $250,000 = $50,000."}
+];
+let sc = 0, scRight = 0, scDone = false; const res = [];
+function showSc(){
+  scDone = false;
+  $("dots").innerHTML = SC.map((_, i) => `<span class="${res[i] === true ? "ok" : res[i] === false ? "miss" : i === sc ? "on" : ""}"></span>`).join("");
+  if (sc >= SC.length){
+    $("scQ").textContent = `All done: ${scRight} of ${SC.length} correct.`;
+    $("scIn").hidden = true; $("scForm").querySelector('[type=submit]').hidden = true;
+    $("scNext").hidden = false; $("scNext").textContent = "Start over"; $("scFb").textContent = ""; return;
+  }
+  $("scQ").textContent = `Case ${sc+1}. ${SC[sc].q}`;
+  $("scIn").hidden = false; $("scIn").value = ""; $("scForm").querySelector('[type=submit]').hidden = false;
+  $("scNext").hidden = true; $("scFb").textContent = ""; $("scFb").className = "feedback";
+}
+$("scForm").addEventListener("submit", e => {
+  e.preventDefault(); if (scDone) return;
+  const v = $("scIn").value.trim(); if (v === "") { $("scIn").focus(); return; }
+  scDone = true;
+  const ok = Number(v) === SC[sc].a; res[sc] = ok; if (ok) scRight++;
+  $("scScore").textContent = scRight + " correct";
+  $("scFb").className = "feedback " + (ok ? "good" : "bad");
+  $("scFb").innerHTML = `<b>${ok ? "Correct." : "Answer: " + fmt(SC[sc].a) + "."}</b> ${SC[sc].why}`;
+  $("scNext").hidden = false; $("scNext").textContent = "Next case"; $("scNext").focus();
+});
+$("scNext").onclick = () => {
+  if (sc >= SC.length){ sc = 0; scRight = 0; res.length = 0; $("scScore").textContent = "0 correct"; }
+  else sc++;
+  showSc();
+};
+showSc();
+</script>
+
+</body>
+</html>
